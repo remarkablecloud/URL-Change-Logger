@@ -21,8 +21,18 @@ function url_change_log_on_save($post_id, $post, $update) {
         // Get the currently logged-in user
         $current_user = wp_get_current_user();
 
-        // Log the URL change with timestamp and the username of the last change
-        url_change_log(get_permalink($post_id), current_time('mysql'), $current_user->user_login);
+        // Use a transient to check if the URL has been logged during this save event
+        $transient_key = 'url_change_logged_' . $post_id;
+        $already_logged = get_transient($transient_key);
+
+        // If the URL has not been logged during this save event, log it
+        if (!$already_logged) {
+            // Log the URL change with timestamp and the username of the last change
+            url_change_log(get_permalink($post_id), current_time('mysql'), $current_user->user_login);
+
+            // Set the transient to prevent logging the same URL again during this save event
+            set_transient($transient_key, true, 60); // Set expiration time to 60 seconds
+        }
     }
 }
 
