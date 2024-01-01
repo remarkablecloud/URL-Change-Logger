@@ -18,10 +18,14 @@ add_action('save_post', 'url_change_log_on_save', 10, 3);
 function url_change_log_on_save($post_id, $post, $update) {
     // Check if the post type is 'post' or 'page'
     if ($post->post_type === 'post' || $post->post_type === 'page') {
-        // Log the URL change with timestamp and author
-        url_change_log(get_permalink($post_id), current_time('mysql'), get_the_author_meta('display_name', $post->post_author));
+        // Get the currently logged-in user
+        $current_user = wp_get_current_user();
+
+        // Log the URL change with timestamp and the username of the last change
+        url_change_log(get_permalink($post_id), current_time('mysql'), $current_user->user_login);
     }
 }
+
 
 // Function to log URL changes
 function url_change_log($url, $timestamp, $author) {
